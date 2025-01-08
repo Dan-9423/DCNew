@@ -1,7 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { EmailTemplateState, EmailTemplateVersion } from '../types/emailTemplate';
 
-const defaultTemplate = `Prezado(s) Senhor(es),
+const defaultTemplates = [
+  {
+    id: '1',
+    version: 'Template Padrão',
+    subject: 'Notificação de Crédito - DC Advisors',
+    content: `Prezado(s) Senhor(es),
 
 Esperamos que esteja bem.
 
@@ -19,87 +24,90 @@ Estamos à disposição para quaisquer esclarecimentos adicionais. No silêncio,
 
 Agradecemos a sua atenção e confiança em nossos serviços.
 
-Atenciosamente,`;
+Atenciosamente,`,
+  },
+  {
+    id: '2',
+    version: 'Template Cobrança',
+    subject: 'Aviso de Pendência - DC Advisors',
+    content: `Prezado Cliente [[razaoSocial]],
+
+Identificamos em nossa base que o título referente à NF [[numeroNF]], no valor de [[valorTotal]], encontra-se pendente de pagamento.
+
+Solicitamos a gentileza de regularizar esta pendência o mais breve possível para evitar possíveis encargos adicionais.
+
+Caso o pagamento já tenha sido efetuado, por favor, desconsidere este aviso e nos envie o comprovante.
+
+Permanecemos à disposição para esclarecimentos.
+
+Atenciosamente,
+DC Advisors`,
+  },
+  {
+    id: '3',
+    version: 'Template Confirmação',
+    subject: 'Confirmação de Recebimento - DC Advisors',
+    content: `Prezado(a),
+
+Confirmamos o recebimento do pagamento referente à NF [[numeroNF]] no valor de [[valorTotal]].
+
+Agradecemos a pontualidade e a confiança em nossos serviços.
+
+Atenciosamente,
+DC Advisors`,
+  }
+];
 
 interface EmailTemplateContextType {
-  template: string;
-  currentVersion: string;
-  versions: EmailTemplateVersion[];
-  updateTemplate: (newTemplate: string, description: string) => void;
-  restoreVersion: (version: EmailTemplateVersion) => void;
-  deleteVersion: (versionId: string) => void;
+  templates: EmailTemplateVersion[];
+  addTemplate: (template: Omit<EmailTemplateVersion, 'id' | 'createdAt'>) => void;
+  updateTemplate: (id: string, template: Partial<EmailTemplateVersion>) => void;
+  deleteTemplate: (id: string) => void;
 }
 
 const EmailTemplateContext = createContext<EmailTemplateContextType | undefined>(undefined);
 
 export function EmailTemplateProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<EmailTemplateState>(() => {
-    const saved = localStorage.getItem('emailTemplateState');
+  const [templates, setTemplates] = useState<EmailTemplateVersion[]>(() => {
+    const saved = localStorage.getItem('emailTemplates');
     if (saved) {
       return JSON.parse(saved);
     }
-    return {
-      currentTemplate: defaultTemplate,
-      currentVersion: 'Template V.001',
-      versions: []
-    };
+    return defaultTemplates.map(template => ({
+      ...template,
+      createdAt: new Date().toISOString()
+    }));
   });
 
   useEffect(() => {
-    localStorage.setItem('emailTemplateState', JSON.stringify(state));
-  }, [state]);
+    localStorage.setItem('emailTemplates', JSON.stringify(templates));
+  }, [templates]);
 
-  const getNextVersion = () => {
-    if (!state.currentVersion) return 'Template V.001';
-    
-    const match = state.currentVersion.match(/V\.(\d+)/);
-    if (!match) return 'Template V.001';
-    
-    const currentNumber = parseInt(match[1]);
-    return `Template V.${String(currentNumber + 1).padStart(3, '0')}`;
+  const addTemplate = (template: Omit<EmailTemplateVersion, 'id' | 'createdAt'>) => {
+    const newTemplate: EmailTemplateVersion = {
+      ...template,
+      id: crypto.randomUUID(),
+      createdAt: new Date().toISOString()
+    };
+    setTemplates(prev => [newTemplate, ...prev]);
   };
 
-  const updateTemplate = (newTemplate: string, description: string) => {
-    setState(prev => {
-      const newVersion: EmailTemplateVersion = {
-        id: crypto.randomUUID(),
-        version: prev.currentVersion,
-        content: prev.currentTemplate,
-        createdAt: new Date(),
-        description
-      };
-
-      return {
-        currentTemplate: newTemplate,
-        currentVersion: getNextVersion(),
-        versions: [newVersion, ...prev.versions].slice(0, 5)
-      };
-    });
+  const updateTemplate = (id: string, template: Partial<EmailTemplateVersion>) => {
+    setTemplates(prev => prev.map(t => 
+      t.id === id ? { ...t, ...template } : t
+    ));
   };
 
-  const restoreVersion = (version: EmailTemplateVersion) => {
-    setState(prev => ({
-      currentTemplate: version.content,
-      currentVersion: version.version,
-      versions: prev.versions
-    }));
-  };
-
-  const deleteVersion = (versionId: string) => {
-    setState(prev => ({
-      ...prev,
-      versions: prev.versions.filter(v => v.id !== versionId)
-    }));
+  const deleteTemplate = (id: string) => {
+    setTemplates(prev => prev.filter(t => t.id !== id));
   };
 
   return (
     <EmailTemplateContext.Provider value={{
-      template: state.currentTemplate,
-      currentVersion: state.currentVersion,
-      versions: state.versions,
+      templates,
+      addTemplate,
       updateTemplate,
-      restoreVersion,
-      deleteVersion
+      deleteTemplate
     }}>
       {children}
     </EmailTemplateContext.Provider>

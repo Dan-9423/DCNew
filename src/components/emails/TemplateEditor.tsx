@@ -12,10 +12,15 @@ import {
 
 interface TemplateEditorProps {
   value: {
+    version?: string;
     subject: string;
     content: string;
   };
-  onChange: (value: { subject: string; content: string }) => void;
+  onChange: (value: {
+    version?: string;
+    subject: string;
+    content: string;
+  }) => void;
   onPreview: () => void;
 }
 
@@ -45,6 +50,15 @@ export default function TemplateEditor({ value, onChange, onPreview }: TemplateE
 
   return (
     <div className="space-y-4">
+      <div className="space-y-2">
+        <Label>Nome do Template</Label>
+        <Input
+          value={value.version}
+          onChange={(e) => onChange({ ...value, version: e.target.value })}
+          placeholder="Ex: Template de Cobrança"
+        />
+      </div>
+
       <div className="space-y-2">
         <Label>Assunto do E-mail</Label>
         <Input

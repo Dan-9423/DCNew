@@ -1,13 +1,11 @@
 export interface EmailTemplateVersion {
   id: string;
   version: string;
+  subject: string;
   content: string;
-  createdAt: Date;
-  description: string;
+  createdAt: string;
 }
 
 export interface EmailTemplateState {
-  currentTemplate: string;
-  currentVersion: string;
-  versions: EmailTemplateVersion[];
+  templates: EmailTemplateVersion[];
 }
