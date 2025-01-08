@@ -10,6 +10,14 @@ import Home from './pages/Home';
 import Profile from './pages/Profile';
 import Auth from './pages/Auth';
 
+// Import new pages
+import ContasSemanais from './pages/relatorios/ContasSemanais';
+import ContasMensais from './pages/relatorios/ContasMensais';
+import Fechamento from './pages/relatorios/Fechamento';
+import Sacados from './pages/emails/Sacados';
+import EnviarEmail from './pages/emails/EnviarEmail';
+import TemplateEmail from './pages/emails/TemplateEmail';
+
 function RequireAuth({ children }: { children: JSX.Element }) {
   const { isAuthenticated } = useAuth();
   const location = useLocation();
@@ -35,6 +43,16 @@ function AppContent() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/profile" element={<Profile />} />
+            
+            {/* Report Routes */}
+            <Route path="/relatorios/contas-semanais" element={<ContasSemanais />} />
+            <Route path="/relatorios/contas-mensais" element={<ContasMensais />} />
+            <Route path="/relatorios/fechamento" element={<Fechamento />} />
+            
+            {/* Email Routes */}
+            <Route path="/emails/sacados" element={<Sacados />} />
+            <Route path="/emails/enviar" element={<EnviarEmail />} />
+            <Route path="/emails/template" element={<TemplateEmail />} />
           </Routes>
         </main>
       </div>
