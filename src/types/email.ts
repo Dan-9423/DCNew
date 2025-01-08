@@ -1,7 +1,9 @@
+export type EmailStatus = 'draft' | 'saved' | 'sent';
+
 export interface EmailData {
-  id?: string;
   razaoSocial: string;
   nomeFantasia?: string;
+  cnpj?: string;
   email: string;
   numeroNF: string;
   valorTotal: number;
@@ -12,8 +14,16 @@ export interface EmailData {
 export interface EmailHistory {
   id: string;
   emailData: EmailData;
-  status: 'draft' | 'saved' | 'sent';
   sentAt: string;
+  status: EmailStatus;
+  logs?: EmailLog[];
+}
+
+export interface EmailLog {
+  id: string;
+  timestamp: Date;
+  action: string;
+  details: string;
 }
 
 export interface EmailTemplate {

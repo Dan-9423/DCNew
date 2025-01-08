@@ -1,6 +1,8 @@
 import { ThemeProvider } from './components/ThemeProvider';
 import { UserProvider } from './contexts/UserContext';
 import { AuthProvider } from './contexts/AuthContext';
+import { CustomerProvider } from './contexts/CustomerContext';
+import { EmailTemplateProvider } from './contexts/EmailTemplateContext';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import Sidebar from './components/Sidebar';
@@ -66,17 +68,21 @@ export default function App() {
       <ThemeProvider>
         <AuthProvider>
           <UserProvider>
-            <Routes>
-              <Route path="/auth" element={<Auth />} />
-              <Route
-                path="/*"
-                element={
-                  <RequireAuth>
-                    <AppContent />
-                  </RequireAuth>
-                }
-              />
-            </Routes>
+            <CustomerProvider>
+              <EmailTemplateProvider>
+                <Routes>
+                  <Route path="/auth" element={<Auth />} />
+                  <Route
+                    path="/*"
+                    element={
+                      <RequireAuth>
+                        <AppContent />
+                      </RequireAuth>
+                    }
+                  />
+                </Routes>
+              </EmailTemplateProvider>
+            </CustomerProvider>
           </UserProvider>
         </AuthProvider>
       </ThemeProvider>
