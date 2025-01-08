@@ -6,19 +6,11 @@ import EmailForm from '@/components/forms/EmailForm';
 import EmailPreview from '@/components/emails/EmailPreview';
 import EmailHistoryList from '@/components/emails/EmailHistoryList';
 import { getEmailTemplate } from '@/lib/email';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
 export default function EnviarEmail() {
   const { customers } = useCustomers();
-  const { template } = useEmailTemplate();
-  const [showPreview, setShowPreview] = useState(false);
+  const { templates } = useEmailTemplate();
   const [emailData, setEmailData] = useState<EmailData | null>(null);
   const [history] = useState([
     {
@@ -36,57 +28,61 @@ export default function EnviarEmail() {
 
   const handleEmailSubmit = (data: EmailData) => {
     setEmailData(data);
-    setShowPreview(true);
   };
 
   const handleSendEmail = () => {
-    // Here you would implement the actual email sending logic
-    setShowPreview(false);
+    // Implementar lógica de envio
+    setEmailData(null);
   };
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Enviar E-mail</h1>
       
-      <div className="bg-white dark:bg-[#1C1C1C] rounded-lg p-6 shadow-lg space-y-6">
-        <EmailForm 
-          onSubmit={handleEmailSubmit}
-          customers={customers}
-        />
-      </div>
+      <div className="grid grid-cols-2 gap-6">
+        {/* Coluna da Esquerda - Formulário */}
+        <div className="space-y-6">
+          <div className="bg-white dark:bg-[#1C1C1C] rounded-lg p-6 shadow-lg">
+            <EmailForm 
+              onSubmit={handleEmailSubmit}
+              customers={customers}
+            />
+          </div>
 
-      <div className="bg-white dark:bg-[#1C1C1C] rounded-lg p-6 shadow-lg">
-        <h2 className="text-xl font-semibold mb-4">Histórico de E-mails</h2>
-        <EmailHistoryList
-          history={history}
-          onView={(email) => {
-            setEmailData(email.emailData);
-            setShowPreview(true);
-          }}
-        />
-      </div>
+          <div className="bg-white dark:bg-[#1C1C1C] rounded-lg p-6 shadow-lg">
+            <h2 className="text-xl font-semibold mb-4">Histórico de E-mails</h2>
+            <EmailHistoryList
+              history={history}
+              onView={(email) => {
+                setEmailData(email.emailData);
+              }}
+            />
+          </div>
+        </div>
 
-      <Dialog open={showPreview} onOpenChange={setShowPreview}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>Visualização do E-mail</DialogTitle>
-          </DialogHeader>
-          {emailData && (
+        {/* Coluna da Direita - Preview */}
+        <div className="bg-white dark:bg-[#1C1C1C] rounded-lg p-6 shadow-lg">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Visualização do E-mail</h2>
+            {emailData && (
+              <Button onClick={handleSendEmail}>
+                Enviar E-mail
+              </Button>
+            )}
+          </div>
+          
+          {emailData ? (
             <EmailPreview
               data={emailData}
-              template={getEmailTemplate(emailData, template)}
+              template={getEmailTemplate(emailData, templates[0]?.content || '')}
             />
+          ) : (
+            <div className="flex items-center justify-center h-[600px] text-muted-foreground">
+              Preencha os dados do e-mail para visualizar
+            </div>
           )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowPreview(false)}>
-              Voltar
-            </Button>
-            <Button onClick={handleSendEmail}>
-              Enviar E-mail
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </div>
+      </div>
     </div>
   );
 }

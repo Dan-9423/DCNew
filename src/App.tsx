@@ -37,9 +37,11 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-[#111111]">
-      <div className="max-w-[1600px] mx-auto flex">
-        <Sidebar />
-        <main className="flex-1 p-8">
+      <div className="flex h-screen max-w-[1600px] mx-auto">
+        <div className="flex-none">
+          <Sidebar />
+        </div>
+        <main className="flex-1 overflow-y-auto p-8">
           <TopBanner />
           {showDashboardNav && <DashboardNav />}
           <Routes>
