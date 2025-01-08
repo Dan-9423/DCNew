@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, FileText, Eye, Pencil, Trash2 } from 'lucide-react';
+import { Plus, FileText, Eye, Pencil, Trash2, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useEmailTemplate } from '@/contexts/EmailTemplateContext';
 import { useToast } from '@/hooks/use-toast';
@@ -18,6 +18,8 @@ import {
 import {
   Card,
   CardContent,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import {
   AlertDialog,
@@ -87,35 +89,44 @@ export default function TemplateEmail() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Templates de E-mail</h1>
-        <Button onClick={() => {
-          setSelectedTemplate({
-            version: `Template ${templates.length + 1}`,
-            subject: '',
-            content: ''
-          });
-          setShowEditor(true);
-        }}>
-          <Plus className="mr-2 h-4 w-4" />
-          Novo Template
-        </Button>
-      </div>
-
-      <Alert>
-        <AlertTitle>Variáveis disponíveis</AlertTitle>
-        <AlertDescription>
-          <p className="mb-2">Use as seguintes variáveis no seu template:</p>
-          <ul className="list-disc pl-4 space-y-1">
+      <Card>
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg font-semibold flex items-center gap-2">
+            <Info className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            Variáveis Dinâmicas
+          </CardTitle>
+          <AlertDescription className="text-blue-600 dark:text-blue-400">
+            Utilize as variáveis abaixo para personalizar seu template. Elas serão substituídas automaticamente pelos dados do cliente.
+          </AlertDescription>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <ul className="space-y-3">
             {variablesList.map((variable) => (
-              <li key={variable.name}>
-                <code className="bg-muted px-1 py-0.5 rounded">{variable.name}</code>
-                {' - '}{variable.description}
+              <li key={variable.name} className="flex items-start space-x-3">
+                <code className="px-2 py-1 rounded bg-gray-100 dark:bg-gray-800 font-mono text-sm text-blue-600 dark:text-blue-400">
+                  {variable.name}
+                </code>
+                <span className="pt-1">
+                  {variable.description}
+                </span>
               </li>
             ))}
           </ul>
-        </AlertDescription>
-      </Alert>
+          <div className="mt-6">
+            <Button onClick={() => {
+              setSelectedTemplate({
+                version: `Template ${templates.length + 1}`,
+                subject: '',
+                content: ''
+              });
+              setShowEditor(true);
+            }}>
+              <Plus className="mr-2 h-4 w-4" />
+              Novo Template
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="space-y-4">
         {templates.length > 0 ? (
