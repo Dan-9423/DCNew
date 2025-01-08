@@ -1,15 +1,12 @@
 import { EmailData } from '../types/email';
 import { formatCurrency } from './utils';
-import { useEmailTemplate } from '../contexts/EmailTemplateContext';
 
 interface EmailTemplate {
   subject: string;
   content: string;
 }
 
-export function getEmailTemplate(data: EmailData): EmailTemplate {
-  const { template } = useEmailTemplate();
-  
+export function getEmailTemplate(data: EmailData, template: string): EmailTemplate {
   // Replace template variables
   const replacements = {
     '[[razaoSocial]]': data.razaoSocial,
