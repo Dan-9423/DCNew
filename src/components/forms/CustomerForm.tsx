@@ -22,13 +22,13 @@ const formSchema = z.object({
   email: z.string().email('E-mail inválido'),
   telefone: z.string().min(10, 'Telefone inválido').optional(),
   endereco: z.object({
-    logradouro: z.string().min(1, 'Logradouro é obrigatório'),
-    numero: z.string().min(1, 'Número é obrigatório'),
+    logradouro: z.string().optional(),
+    numero: z.string().optional(),
     complemento: z.string().optional(),
-    bairro: z.string().min(1, 'Bairro é obrigatório'),
-    cidade: z.string().min(1, 'Cidade é obrigatória'),
-    estado: z.string().length(2, 'Estado inválido'),
-    cep: z.string().length(8, 'CEP inválido'),
+    bairro: z.string().optional(),
+    cidade: z.string().optional(),
+    estado: z.string().optional(),
+    cep: z.string().optional(),
   }).optional(),
 });
 
@@ -76,7 +76,7 @@ export default function CustomerForm({ onSubmit, initialData }: CustomerFormProp
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form id="customer-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-2 gap-6">
           <FormField
             control={form.control}
@@ -160,7 +160,7 @@ export default function CustomerForm({ onSubmit, initialData }: CustomerFormProp
         </div>
 
         <div className="space-y-4">
-          <h3 className="text-lg font-medium">Endereço</h3>
+          <h3 className="text-lg font-medium">Endereço (Opcional)</h3>
           <div className="grid grid-cols-2 gap-6">
             <FormField
               control={form.control}
@@ -262,9 +262,11 @@ export default function CustomerForm({ onSubmit, initialData }: CustomerFormProp
           </div>
         </div>
 
-        <Button type="submit" className="w-full">
-          {initialData ? 'Atualizar' : 'Cadastrar'} Sacado
-        </Button>
+        {!initialData && (
+          <Button type="submit" className="w-full">
+            Cadastrar Sacado
+          </Button>
+        )}
       </form>
     </Form>
   );

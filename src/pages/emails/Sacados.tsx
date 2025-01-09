@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import { Customer } from '@/types/customer';
 import CustomerList from '@/components/customers/CustomerList';
 import CustomerSearch from '@/components/customers/CustomerSearch';
 import CustomerForm from '@/components/forms/CustomerForm';
 import { Button } from '@/components/ui/button';
+import { useCustomers } from '@/contexts/CustomerContext';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,25 +21,34 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { useToast } from '@/hooks/use-toast';
-
-// Mock data
-const mockCustomers: Customer[] = [
-  // ... (manter os dados mockados enquanto não temos o Supabase configurado)
-];
+import { formatCNPJ, formatPhone } from '@/lib/utils';
 
 export default function Sacados() {
   const { toast } = useToast();
-  const [customers, setCustomers] = useState<Customer[]>(mockCustomers);
-  const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>(mockCustomers);
+  const { customers, addNewCustomer, updateCustomer, deleteCustomer } = useCustomers();
+  const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
   const [deleteCustomerId, setDeleteCustomerId] = useState<string | null>(null);
   const [showNewCustomerModal, setShowNewCustomerModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+
+  useEffect(() => {
+    setFilteredCustomers(customers);
+  }, [customers]);
 
   const handleSearch = (query: string) => {
+    if (!query.trim()) {
+      setFilteredCustomers(customers);
+      return;
+    }
+    
     const filtered = customers.filter(customer => 
       customer.razaoSocial.toLowerCase().includes(query.toLowerCase()) ||
-      customer.nomeFantasia.toLowerCase().includes(query.toLowerCase()) ||
+      customer.nomeFantasia?.toLowerCase().includes(query.toLowerCase()) ||
       customer.cnpj.includes(query) ||
       customer.email.toLowerCase().includes(query.toLowerCase())
     );
@@ -46,12 +56,7 @@ export default function Sacados() {
   };
 
   const handleNewCustomer = (data: Customer) => {
-    const newCustomer = {
-      ...data,
-      id: crypto.randomUUID()
-    };
-    setCustomers(prev => [newCustomer, ...prev]);
-    setFilteredCustomers(prev => [newCustomer, ...prev]);
+    addNewCustomer(data);
     setShowNewCustomerModal(false);
     toast({
       title: "Sacado cadastrado",
@@ -60,7 +65,20 @@ export default function Sacados() {
   };
 
   const handleEdit = (customer: Customer) => {
-    console.log('Edit customer:', customer);
+    setSelectedCustomer(customer);
+    setShowEditModal(true);
+  };
+
+  const handleEditSubmit = (data: Customer) => {
+    if (selectedCustomer) {
+      updateCustomer(selectedCustomer.id, data);
+      setShowEditModal(false);
+      setSelectedCustomer(null);
+      toast({
+        title: "Sacado atualizado",
+        description: "O sacado foi atualizado com sucesso.",
+      });
+    }
   };
 
   const handleDelete = (customerId: string) => {
@@ -69,9 +87,7 @@ export default function Sacados() {
 
   const confirmDelete = () => {
     if (deleteCustomerId) {
-      const updatedCustomers = customers.filter(c => c.id !== deleteCustomerId);
-      setCustomers(updatedCustomers);
-      setFilteredCustomers(updatedCustomers);
+      deleteCustomer(deleteCustomerId);
       setDeleteCustomerId(null);
       toast({
         title: "Sacado excluído",
@@ -81,7 +97,8 @@ export default function Sacados() {
   };
 
   const handleView = (customer: Customer) => {
-    console.log('View customer:', customer);
+    setSelectedCustomer(customer);
+    setShowViewModal(true);
   };
 
   return (
@@ -107,6 +124,7 @@ export default function Sacados() {
         </div>
       </div>
 
+      {/* Modal de Novo Sacado */}
       <Dialog open={showNewCustomerModal} onOpenChange={setShowNewCustomerModal}>
         <DialogContent className="max-w-4xl">
           <DialogHeader>
@@ -116,6 +134,105 @@ export default function Sacados() {
         </DialogContent>
       </Dialog>
 
+      {/* Modal de Edição */}
+      <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Editar Sacado</DialogTitle>
+          </DialogHeader>
+          <CustomerForm 
+            onSubmit={handleEditSubmit}
+            initialData={selectedCustomer || undefined}
+          />
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowEditModal(false)}>
+              Cancelar
+            </Button>
+            <Button type="submit" form="customer-form">
+              Atualizar Cadastro
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Visualização */}
+      <Dialog open={showViewModal} onOpenChange={setShowViewModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Detalhes do Sacado</DialogTitle>
+          </DialogHeader>
+          {selectedCustomer && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h3 className="font-medium text-sm text-muted-foreground mb-1">Razão Social</h3>
+                  <p>{selectedCustomer.razaoSocial}</p>
+                </div>
+                <div>
+                  <h3 className="font-medium text-sm text-muted-foreground mb-1">Nome Fantasia</h3>
+                  <p>{selectedCustomer.nomeFantasia}</p>
+                </div>
+                <div>
+                  <h3 className="font-medium text-sm text-muted-foreground mb-1">CNPJ</h3>
+                  <p>{formatCNPJ(selectedCustomer.cnpj)}</p>
+                </div>
+                <div>
+                  <h3 className="font-medium text-sm text-muted-foreground mb-1">Telefone</h3>
+                  <p>{selectedCustomer.telefone ? formatPhone(selectedCustomer.telefone) : '-'}</p>
+                </div>
+                <div className="col-span-2">
+                  <h3 className="font-medium text-sm text-muted-foreground mb-1">E-mail</h3>
+                  <p>{selectedCustomer.email}</p>
+                </div>
+              </div>
+
+              {selectedCustomer.endereco && (
+                <>
+                  <div className="h-px bg-border" />
+                  <div>
+                    <h3 className="font-medium mb-3">Endereço</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="col-span-2">
+                        <h4 className="font-medium text-sm text-muted-foreground mb-1">Logradouro</h4>
+                        <p>{selectedCustomer.endereco.logradouro}, {selectedCustomer.endereco.numero}</p>
+                      </div>
+                      {selectedCustomer.endereco.complemento && (
+                        <div className="col-span-2">
+                          <h4 className="font-medium text-sm text-muted-foreground mb-1">Complemento</h4>
+                          <p>{selectedCustomer.endereco.complemento}</p>
+                        </div>
+                      )}
+                      <div>
+                        <h4 className="font-medium text-sm text-muted-foreground mb-1">Bairro</h4>
+                        <p>{selectedCustomer.endereco.bairro}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-sm text-muted-foreground mb-1">CEP</h4>
+                        <p>{selectedCustomer.endereco.cep}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-sm text-muted-foreground mb-1">Cidade</h4>
+                        <p>{selectedCustomer.endereco.cidade}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-sm text-muted-foreground mb-1">Estado</h4>
+                        <p>{selectedCustomer.endereco.estado}</p>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowViewModal(false)}>
+              Fechar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de Confirmação de Exclusão */}
       <AlertDialog open={!!deleteCustomerId} onOpenChange={() => setDeleteCustomerId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
