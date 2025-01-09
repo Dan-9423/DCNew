@@ -160,23 +160,23 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-[#111111] p-4">
-      <div className="w-full max-w-4xl bg-[#1C1C1C] rounded-2xl shadow-2xl overflow-hidden flex">
+      <div className="w-full max-w-6xl bg-[#1C1C1C] rounded-2xl shadow-2xl overflow-hidden flex">
         {/* Left Side - Image */}
-        <div className="w-2/5 relative hidden md:block">
+        <div className="w-3/5 relative hidden md:block">
           <div className="absolute inset-0 bg-gradient-to-t from-[#1C1C1C] via-transparent" />
           <img
             src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2064&auto=format&fit=crop"
             alt="Ondas Abstratas"
             className="w-full h-full object-cover"
           />
-          <div className="absolute bottom-0 left-0 right-0 p-8">
-            <h2 className="text-2xl font-bold text-white mb-2">{t.welcome}</h2>
-            <p className="text-gray-200 text-sm">{t.secure}</p>
+          <div className="absolute bottom-0 left-0 right-0 p-12">
+            <h2 className="text-3xl font-bold text-white mb-3">{t.welcome}</h2>
+            <p className="text-gray-200 text-lg">{t.secure}</p>
           </div>
         </div>
 
         {/* Right Side - Form */}
-        <div className="w-full md:w-3/5 p-8">
+        <div className="w-full md:w-2/5 p-12">
           <div className="w-72 mx-auto mb-12">
             <Logo />
           </div>
