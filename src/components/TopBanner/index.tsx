@@ -47,7 +47,7 @@ export default function TopBanner() {
   }, [user.firstName, user.gender]);
 
   return (
-    <div className="bg-white dark:bg-[#1C1C1C] rounded-lg shadow-lg dark:shadow-[#000000]/10 p-4 mb-6">
+    <div className="bg-white dark:bg-[#1C1C1C] rounded-lg shadow-lg dark:shadow-[#000000]/10 p-6 mb-6">
       <div className="flex justify-between items-center">
         <div>
           {isHomePage ? (

@@ -37,8 +37,6 @@ export default function EnviarEmail() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Enviar E-mail</h1>
-      
       <div className="grid grid-cols-2 gap-6">
         {/* Coluna da Esquerda - Formulário */}
         <div className="space-y-6">
